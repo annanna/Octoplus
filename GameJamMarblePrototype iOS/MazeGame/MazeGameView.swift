@@ -68,15 +68,27 @@ struct MazeGameView: View {
     
     private var promptView: some View {
         ZStack {
-            Image("fluencySlide")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+            if UIDevice.isIPad {
+                Color.black
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+                
+                Image("fluencySlide")
+                    .resizable()
+                    .scaledToFit()
+                    .ignoresSafeArea()
+            } else {
+                Image("fluencySlide")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+            }
             
             VStack(spacing: 0) {
                 Spacer()
                 
                 speechBubbleView
+                    .frame(maxWidth: 300)
                     .padding(.horizontal, 80)
                 
                 Spacer()
@@ -126,11 +138,11 @@ struct MazeGameView: View {
                 }
                 
                 HStack(alignment: .bottom, spacing: 0) {
-#if targetEnvironment(simulator)
+                    #if targetEnvironment(simulator)
                     SimulatorDPadView(motionManager: motionManager)
                         .frame(width: 160, height: 160)
                         .padding(.leading, 20)
-#endif
+                    #endif
                     Spacer()
                     tapButton
                         .padding(.trailing, 20)
@@ -151,6 +163,7 @@ struct MazeGameView: View {
                 .padding(.horizontal, 64)
                 .font(.title2)
                 .bold()
+                .padding(.top, 20)
             
             HStack(spacing: 0) {
                 hudCell(symbol: nil, image: "schnecke",
@@ -272,4 +285,14 @@ private struct SpeechBubblePointer: Shape {
         
     }
     .environment(AppState())
+}
+
+extension UIDevice {
+    static var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+    
+    static var isIPhone: Bool {
+        UIDevice.current.userInterfaceIdiom == .phone
+    }
 }
