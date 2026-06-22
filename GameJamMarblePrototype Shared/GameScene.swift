@@ -7,119 +7,107 @@
 
 import SpriteKit
 
-class GameScene: SKScene {
-    
-    
-    fileprivate var label : SKLabelNode?
-    fileprivate var spinnyNode : SKShapeNode?
+class GameScene: SKScene, SKPhysicsContactDelegate {
 
-    
-    class func newGameScene() -> GameScene {
-        // Load 'GameScene.sks' as an SKScene.
-        guard let scene = SKScene(fileNamed: "GameScene") as? GameScene else {
-            print("Failed to load GameScene.sks")
-            abort()
-        }
-        
-        // Set the scale mode to scale to fit the window
-        scene.scaleMode = .aspectFill
-        
-        return scene
+    // MARK: - Physics bit masks
+    private enum Physics {
+        static let octopus: UInt32 = 1 << 0
+        static let wall:    UInt32 = 1 << 1
+        static let goal:    UInt32 = 1 << 2
     }
-    
-    func setUpScene() {
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 4.0
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
-    }
-    
+
+    // Injected by ContentView before presentation
+    var motionManager: MotionManager?
+    // MARK: - Multiplayer handoff: replace onWin with a match session broadcast
+    var onWin: (() -> Void)?
+
+    private var octopus: OctopusNode!
+    private var hasWon = false
+    private let maxSpeed: CGFloat = 300
+    private let gravityScale: CGFloat = 15
+
+    // MARK: - Lifecycle
+
     override func didMove(to view: SKView) {
-        self.setUpScene()
+        anchorPoint = CGPoint(x: 0.5, y: 0.5) // origin at center — explicit override for safety
+        backgroundColor = SKColor(red: 0.05, green: 0.08, blue: 0.18, alpha: 1)
+        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+        physicsWorld.contactDelegate = self
+
+        MazeBuilder.build(in: self, wallCategory: Physics.wall, octopusCategory: Physics.octopus)
+        spawnGoal()
+        spawnOctopus()
+        addSmallLabel("START", at: CGPoint(x: 0, y:  hh * 0.806 + 28))
     }
 
-    func makeSpinny(at pos: CGPoint, color: SKColor) {
-        if let spinny = self.spinnyNode?.copy() as! SKShapeNode? {
-            spinny.position = pos
-            spinny.strokeColor = color
-            self.addChild(spinny)
-        }
+    // Half-height shorthand — valid after size is set by resizeFill
+    private var hh: CGFloat { size.height / 2 }
+
+    // MARK: - Spawn helpers
+
+    private func spawnGoal() {
+        let goal = GoalPortalNode()
+        goal.position = CGPoint(x: 0, y: -(hh * 0.806))
+
+        let body = SKPhysicsBody(circleOfRadius: 30)
+        body.isDynamic = false
+        body.categoryBitMask = Physics.goal
+        body.contactTestBitMask = Physics.octopus
+        body.collisionBitMask = 0  // sensor
+        goal.physicsBody = body
+        addChild(goal)
     }
-    
+
+    private func spawnOctopus() {
+        octopus = OctopusNode()
+        octopus.position = CGPoint(x: 0, y: hh * 0.806)
+
+        let body = SKPhysicsBody(circleOfRadius: octopus.radius)
+        body.linearDamping = 0.4
+        body.angularDamping = 0.8
+        body.restitution = 0.1
+        body.allowsRotation = false
+        body.categoryBitMask = Physics.octopus
+        body.contactTestBitMask = Physics.goal
+        body.collisionBitMask = Physics.wall
+        octopus.physicsBody = body
+        addChild(octopus)
+    }
+
+    private func addSmallLabel(_ text: String, at point: CGPoint) {
+        let label = SKLabelNode(text: text)
+        label.fontName = "Helvetica-Bold"
+        label.fontSize = 11
+        label.fontColor = SKColor(white: 1, alpha: 0.45)
+        label.position = point
+        addChild(label)
+    }
+
+    // MARK: - Game loop
+
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        guard !hasWon else { return }
+
+        let tilt = motionManager?.tiltForFrame() ?? CGVector(dx: 0, dy: 0)
+        physicsWorld.gravity = CGVector(dx: tilt.dx * gravityScale, dy: tilt.dy * gravityScale)
+
+        guard let vel = octopus?.physicsBody?.velocity else { return }
+        let speed = hypot(vel.dx, vel.dy)
+        if speed > maxSpeed {
+            let factor = maxSpeed / speed
+            octopus.physicsBody?.velocity = CGVector(dx: vel.dx * factor, dy: vel.dy * factor)
+        }
+    }
+
+    // MARK: - Physics contact
+
+    func didBegin(_ contact: SKPhysicsContact) {
+        let mask = contact.bodyA.categoryBitMask | contact.bodyB.categoryBitMask
+        guard mask == Physics.octopus | Physics.goal, !hasWon else { return }
+        hasWon = true
+        octopus.physicsBody?.isDynamic = false
+        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+        // MARK: - Multiplayer handoff: broadcast win event to match participants here
+        onWin?()
     }
 }
-
-#if os(iOS) || os(tvOS)
-// Touch-based event handling
-extension GameScene {
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.green)
-        }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.blue)
-        }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.red)
-        }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches {
-            self.makeSpinny(at: t.location(in: self), color: SKColor.red)
-        }
-    }
-    
-   
-}
-#endif
-
-#if os(OSX)
-// Mouse-based event handling
-extension GameScene {
-
-    override func mouseDown(with event: NSEvent) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        self.makeSpinny(at: event.location(in: self), color: SKColor.green)
-    }
-    
-    override func mouseDragged(with event: NSEvent) {
-        self.makeSpinny(at: event.location(in: self), color: SKColor.blue)
-    }
-    
-    override func mouseUp(with event: NSEvent) {
-        self.makeSpinny(at: event.location(in: self), color: SKColor.red)
-    }
-
-}
-#endif
-
