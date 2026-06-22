@@ -49,8 +49,9 @@ enum MazeBuilder {
             (CGPoint(x: cxGapRight, y: yd), CGSize(width: wallW, height: wh)), // gap right
         ]
 
-        for def in defs {
-            let wall = SKSpriteNode(color: SKColor(white: 1, alpha: 1), size: def.sz)
+        for (idx, def) in defs.enumerated() {
+            let isOuterBorder = idx < 4
+            let wall = SKSpriteNode(color: isOuterBorder ? .clear : SKColor(white: 1, alpha: 1), size: def.sz)
             wall.position = def.pos
             let body = SKPhysicsBody(rectangleOf: def.sz)
             body.isDynamic = false
