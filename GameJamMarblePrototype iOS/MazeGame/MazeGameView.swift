@@ -11,7 +11,7 @@ internal import Combine
 private final class MazeGameModel {
     var score         = 0
     var tapCount      = 0
-    var timeRemaining = 180
+    var timeRemaining = 30
 }
 
 struct MazeGameView: View {
@@ -61,7 +61,7 @@ struct MazeGameView: View {
                     didComplete = true
                     onComplete(GameResult(
                         score: model.score,
-                        timeUsed: 180,
+                        timeUsed: 30,
                         tapCount: model.tapCount
                     ))
                 }

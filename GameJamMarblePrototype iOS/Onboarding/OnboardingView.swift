@@ -8,7 +8,7 @@ import SwiftUI
 private let onboardingSlides: [InstructionSlide] = [
     InstructionSlide(
         title: "Willkommen!",
-        body: "Ich bin Ollie, euer Oktopus-Guide. Gemeinsam erkunden wir kleine Spiele, die zeigen, wie Stress entsteht – und wie ihr besser damit umgehen könnt.",
+        body: "Ich bin Toni Tinte, euer Oktopus-Guide. Gemeinsam erkunden wir kleine Spiele, die zeigen, wie Stress entsteht – und wie ihr besser damit umgehen könnt.",
         symbol: "fish.fill"
     ),
     InstructionSlide(
@@ -25,37 +25,37 @@ private let onboardingSlides: [InstructionSlide] = [
 
 struct OnboardingView: View {
     let onDone: () -> Void
-
+    
     @State private var currentIndex = 0
-
+    
     var body: some View {
         ZStack {
             Color(red: 0.04, green: 0.07, blue: 0.16)
                 .ignoresSafeArea()
-
+            
             VStack(spacing: 0) {
                 Spacer()
-
+                
                 Image(systemName: onboardingSlides[currentIndex].symbol)
                     .font(.system(size: 80))
                     .foregroundStyle(Color(red: 0.56, green: 0.35, blue: 0.93))
                     .padding(.bottom, 48)
-
+                
                 Text(onboardingSlides[currentIndex].title)
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-
+                
                 Text(onboardingSlides[currentIndex].body)
                     .font(.system(size: 17))
                     .foregroundStyle(.white.opacity(0.75))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .padding(.top, 16)
-
+                
                 Spacer()
-
+                
                 HStack(spacing: 8) {
                     ForEach(0..<onboardingSlides.count, id: \.self) { i in
                         Circle()
@@ -65,7 +65,7 @@ struct OnboardingView: View {
                     }
                 }
                 .padding(.bottom, 32)
-
+                
                 Button(currentIndex < onboardingSlides.count - 1 ? "Weiter" : "Los geht's!") {
                     if currentIndex < onboardingSlides.count - 1 {
                         withAnimation(.easeInOut) { currentIndex += 1 }
