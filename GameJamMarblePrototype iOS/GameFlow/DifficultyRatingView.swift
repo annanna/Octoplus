@@ -52,7 +52,7 @@ struct DifficultyRatingView: View {
 
                 Spacer()
 
-                Button("Weiter") {
+                Button("Los geht's!") {
                     onSubmit(selectedRating ?? 3)
                 }
                 .buttonStyle(.borderedProminent)

@@ -18,35 +18,14 @@ final class GoalPortalNode: SKNode {
     }
 
     private func buildAppearance(radius: CGFloat) {
-        let teal = SKColor(red: 0.0, green: 0.78, blue: 0.74, alpha: 1)
-
-        let outer = SKShapeNode(circleOfRadius: radius)
-        outer.strokeColor = teal
-        outer.lineWidth = 4
-        outer.fillColor = SKColor(red: 0.0, green: 0.78, blue: 0.74, alpha: 0.15)
-        outer.glowWidth = 10
-        addChild(outer)
-
-        let inner = SKShapeNode(circleOfRadius: radius * 0.55)
-        inner.strokeColor = .white
-        inner.lineWidth = 2
-        inner.fillColor = SKColor(white: 1, alpha: 0.06)
-        addChild(inner)
+        let sprite = SKSpriteNode(imageNamed: "schnecke")
+        sprite.size = CGSize(width: radius * 4, height: radius * 4)
+        addChild(sprite)
 
         let pulse = SKAction.sequence([
-            SKAction.group([
-                SKAction.scale(to: 1.12, duration: 0.9),
-                SKAction.fadeAlpha(to: 0.7, duration: 0.9)
-            ]),
-            SKAction.group([
-                SKAction.scale(to: 1.0, duration: 0.9),
-                SKAction.fadeAlpha(to: 1.0, duration: 0.9)
-            ])
+            SKAction.scale(to: 1.12, duration: 0.9),
+            SKAction.scale(to: 1.0,  duration: 0.9)
         ])
         run(SKAction.repeatForever(pulse))
-
-        outer.run(SKAction.repeatForever(
-            SKAction.rotate(byAngle: .pi * 2, duration: 5)
-        ))
     }
 }

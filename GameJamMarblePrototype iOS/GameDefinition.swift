@@ -9,7 +9,15 @@ struct InstructionSlide: Identifiable {
     let id = UUID()
     let title: String
     let body: String
-    let symbol: String
+    let symbol: String?
+    let imageName: String?
+    
+    init(title: String, body: String, symbol: String? = nil, imageName: String? = nil) {
+        self.title = title
+        self.body = body
+        self.symbol = symbol
+        self.imageName = imageName
+    }
 }
 
 struct GameTips {

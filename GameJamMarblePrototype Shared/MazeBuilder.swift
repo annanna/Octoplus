@@ -50,7 +50,7 @@ enum MazeBuilder {
         ]
 
         for def in defs {
-            let wall = SKSpriteNode(color: SKColor(white: 0.55, alpha: 1), size: def.sz)
+            let wall = SKSpriteNode(color: SKColor(white: 1, alpha: 1), size: def.sz)
             wall.position = def.pos
             let body = SKPhysicsBody(rectangleOf: def.sz)
             body.isDynamic = false

@@ -55,10 +55,12 @@ struct GameInstructionsView: View {
 
     private var slideContent: some View {
         VStack(spacing: 24) {
-            Image(systemName: slides[slideIndex].symbol)
-                .font(.system(size: 64))
-                .foregroundStyle(game.accentColor)
-
+            if let symbol = slides[slideIndex].symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 64))
+                    .foregroundStyle(game.accentColor)
+            }
+            
             Text(slides[slideIndex].title)
                 .font(.system(size: 26, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)

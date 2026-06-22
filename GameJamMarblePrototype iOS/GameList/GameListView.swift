@@ -11,7 +11,7 @@ private let allGames: [GameDefinition] = [
         id: "bubbles",
         title: "Bubble Pop",
         subtitle: "Demnächst verfügbar",
-        accentColor: Color(red: 0.0, green: 0.72, blue: 0.9),
+        accentColor: Color(red: 202/256, green: 157/256, blue: 113/256),
         isUnlocked: false,
         instructionSlides: [],
         tips: GameTips(easier: [], harder: []),
