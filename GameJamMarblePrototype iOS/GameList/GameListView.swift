@@ -14,7 +14,7 @@ private let allGames: [GameDefinition] = [
         accentColor: Color(red: 202/256, green: 157/256, blue: 113/256),
         isUnlocked: false,
         instructionSlides: [],
-        tips: GameTips(easier: [], harder: []),
+        tips: GameTips(forEasy: [], forHard: []),
         makeView: { _ in AnyView(EmptyView()) },
         imageName: "BuntesMeer"
     ),
@@ -25,7 +25,7 @@ private let allGames: [GameDefinition] = [
         accentColor: Color(red: 1.0, green: 0.47, blue: 0.0),
         isUnlocked: false,
         instructionSlides: [],
-        tips: GameTips(easier: [], harder: []),
+        tips: GameTips(forEasy: [], forHard: []),
         makeView: { _ in AnyView(EmptyView()) },
         imageName: "BlubberTanz"
     ),

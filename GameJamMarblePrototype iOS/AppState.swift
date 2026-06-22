@@ -16,15 +16,17 @@ enum GameFlowPhase {
     case playing
     case results(GameResult)
     case rating(GameResult)
-    case tips(GameResult)
+    case tips(GameResult, Bool)
 }
 
 @Observable
 final class AppState {
     var appPhase: AppPhase = .onboarding
     var gameFlowPhase: GameFlowPhase = .instructions
+    var pendingAxesSwapped: Bool = false
 
     func startGame(_ game: GameDefinition) {
+        pendingAxesSwapped = false
         gameFlowPhase = .instructions
         appPhase = .gameFlow(game)
     }
@@ -41,8 +43,13 @@ final class AppState {
         gameFlowPhase = .rating(result)
     }
 
-    func continueToTips(result: GameResult) {
-        gameFlowPhase = .tips(result)
+    func continueToTips(result: GameResult, wasEasy: Bool) {
+        gameFlowPhase = .tips(result, wasEasy)
+    }
+
+    func restartGame(axesSwapped: Bool = false) {
+        pendingAxesSwapped = axesSwapped
+        gameFlowPhase = .playing
     }
 
     func finishGame() {

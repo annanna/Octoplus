@@ -20,9 +20,22 @@ struct InstructionSlide: Identifiable {
     }
 }
 
+enum GameChallenge {
+    case axesSwapped
+}
+
+struct GameTip: Identifiable {
+    let id: String
+    let emoji: String
+    let title: String
+    let subtitle: String
+    var challenge: GameChallenge? = nil
+    var actionLabel: String? = nil
+}
+
 struct GameTips {
-    let easier: [String]
-    let harder: [String]
+    let forEasy: [GameTip]
+    let forHard: [GameTip]
 }
 
 struct GameResult {

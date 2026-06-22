@@ -18,6 +18,7 @@ private final class MazeGameModel {
 struct MazeGameView: View {
     let onComplete: (GameResult) -> Void
     
+    @Environment(AppState.self) private var appState
     @State private var motionManager = MotionManager()
     @State private var model         = MazeGameModel()
     @State private var scene: GameScene?
@@ -27,7 +28,7 @@ struct MazeGameView: View {
     @State private var phase: MazePhase = .prompt
     @State private var sceneReady = false
     @State private var prompt = VerbalFluencyPrompts.randomElement() ?? ""
-
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -240,6 +241,7 @@ struct MazeGameView: View {
         s.anchorPoint   = CGPoint(x: 0.5, y: 0.5)
         s.scaleMode     = .resizeFill
         s.motionManager = motionManager
+        motionManager.axesSwapped = appState.pendingAxesSwapped
         s.level         = selectedLevel
         let m = model
         s.onScoreChanged = { newScore in m.score = newScore }
@@ -269,4 +271,5 @@ private struct SpeechBubblePointer: Shape {
     MazeGameView { _ in
         
     }
+    .environment(AppState())
 }

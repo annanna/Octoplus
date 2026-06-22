@@ -29,15 +29,20 @@ let mazeGame = GameDefinition(
         )
     ],
     tips: GameTips(
-        easier: [
-            "Lege das Gerät auf eine feste Unterlage",
-            "Mache kleine, ruhige Bewegungen",
-            "Atme tief durch – Ruhe überträgt sich auf die Steuerung",
+        forEasy: [
+            GameTip(id: "axes-swapped", emoji: "🔄", title: "Achsen tauschen",
+                    subtitle: "Links/rechts-Neigung ist umgekehrt", challenge: .axesSwapped),
+            GameTip(id: "one-leg", emoji: "🦵", title: "Auf einem Bein stehen",
+                    subtitle: "Stehe auf einem Bein während der Übung"),
+            GameTip(id: "radio-on", emoji: "📻", title: "Radio anschalten",
+                    subtitle: "Erhöhe die akustische Ablenkung"),
         ],
-        harder: [
-            "Versuche es mit einer Hand",
-            "Halte das Gerät über Kopfhöhe",
-            "Setze dir ein Punkteziel für die nächste Runde",
+        forHard: [
+            GameTip(id: "no-noise", emoji: "🎧", title: "Geräusche ausschalten",
+                    subtitle: "Setze Kopfhörer ein oder schalte das Radio neben dir aus, um Ablenkungen zu reduzieren."),
+            GameTip(id: "meditation", emoji: "🧘", title: "1-Minuten-Meditation mit Toni",
+                    subtitle: "Kurz durchatmen und den Kopf frei machen, bevor du neu startest.",
+                    actionLabel: "Jetzt meditieren →"),
         ]
     ),
     makeView: { onComplete in

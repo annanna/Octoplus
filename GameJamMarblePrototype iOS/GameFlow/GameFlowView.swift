@@ -26,11 +26,13 @@ struct GameFlowView: View {
                 appState.continueToRating(result: result)
             }
         case .rating(let result):
-            DifficultyRatingView(game: game) { _ in
-                appState.continueToTips(result: result)
+            DifficultyRatingView(game: game) { wasEasy in
+                appState.continueToTips(result: result, wasEasy: wasEasy)
             }
-        case .tips(let result):
-            GameTipsView(game: game, result: result) {
+        case .tips(let result, let wasEasy):
+            GameTipsView(game: game, result: result, wasEasy: wasEasy) { axesSwapped in
+                appState.restartGame(axesSwapped: axesSwapped)
+            } onDone: {
                 appState.finishGame()
             }
         }
