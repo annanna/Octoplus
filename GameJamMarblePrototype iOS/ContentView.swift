@@ -8,14 +8,8 @@
 import SwiftUI
 import SpriteKit
 
-@Observable
-private final class GameState {
-    var isWon = false
-}
-
 struct ContentView: View {
     @State private var motionManager = MotionManager()
-    @State private var gameState = GameState()
     @State private var scene: GameScene?
     @State private var viewSize: CGSize = .zero
 
@@ -25,7 +19,6 @@ struct ContentView: View {
                 Color.black
 
                 if let scene {
-                    // Explicit frame forces SpriteView to fill the full screen
                     SpriteView(scene: scene)
                         .frame(width: geo.size.width, height: geo.size.height)
                 }
@@ -52,10 +45,6 @@ struct ContentView: View {
                     }
                     .padding(.bottom, 40)
                 }
-
-                if gameState.isWon {
-                    WinOverlayView { resetGame() }
-                }
             }
             .onAppear {
                 viewSize = geo.size
@@ -67,17 +56,14 @@ struct ContentView: View {
 
     private func buildScene(size: CGSize) -> GameScene {
         let s = GameScene(size: size)
-        s.anchorPoint = CGPoint(x: 0.5, y: 0.5) // origin at center — do not rely on defaults
+        s.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         s.scaleMode = .resizeFill
         s.motionManager = motionManager
-        let gs = gameState
-        s.onWin = { gs.isWon = true }
-        // MARK: - Multiplayer handoff: inject GameSession here for multiplayer coordination
+        // MARK: - Multiplayer handoff: inject GameSession / wire onScoreChanged here
         return s
     }
 
     private func resetGame() {
-        gameState.isWon = false
         let size = viewSize.width > 0 ? viewSize : UIScreen.main.bounds.size
         scene = buildScene(size: size)
     }
