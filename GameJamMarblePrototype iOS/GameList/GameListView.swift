@@ -73,6 +73,7 @@ private struct GameCard: View {
                     .overlay {
                         Image(game.imageName)
                             .resizable()
+                            .frame(maxWidth: 100)
                             .font(.system(size: 22))
                             .foregroundStyle(game.accentColor.opacity(game.isUnlocked ? 1 : 0.4))
                     }

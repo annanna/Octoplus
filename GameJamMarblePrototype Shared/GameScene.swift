@@ -25,6 +25,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var level: GameLevel = .normal
     // MARK: - Multiplayer handoff: broadcast score / game-over via match session here
     var onScoreChanged: ((Int) -> Void)?
+    var onReady: (() -> Void)?
     
     private var octopus: OctopusNode!
     private var goalNode: GoalPortalNode!
@@ -52,10 +53,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
         
         motionManager?.axesSwapped = (level == .advanced)
-        
+
         MazeBuilder.build(in: self, wallCategory: Physics.wall, octopusCategory: Physics.octopus)
         spawnGoal()
         spawnOctopus()
+        onReady?()
     }
     
     // MARK: - Spawn helpers

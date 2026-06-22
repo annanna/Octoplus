@@ -41,8 +41,8 @@ struct GameResultsView: View {
                         accent: Color(red: 1.0, green: 0.78, blue: 0.0)
                     )
                     statCell(
-                        symbol: "arrow.counterclockwise",
-                        label: "Neustarts",
+                        symbol: "doc.append",
+                        label: "Wörter",
                         value: "\(result.tapCount)",
                         accent: Color(red: 0.25, green: 0.88, blue: 0.65)
                     )

@@ -1,11 +1,12 @@
 //
 //  MazeGameView.swift
 //  GameJamMarblePrototype iOS
-//
 
 import SwiftUI
 import SpriteKit
 internal import Combine
+
+private enum MazePhase: Equatable { case prompt, playing }
 
 @Observable
 private final class MazeGameModel {
@@ -23,38 +24,29 @@ struct MazeGameView: View {
     @State private var viewSize: CGSize = .zero
     @State private var selectedLevel: GameLevel = .normal
     @State private var didComplete = false
+    @State private var phase: MazePhase = .prompt
+    @State private var sceneReady = false
+    @State private var prompt = VerbalFluencyPrompts.randomElement() ?? ""
 
     var body: some View {
         GeometryReader { geo in
-            VStack(spacing: 0) {
-                topChrome(safeTop: geo.safeAreaInsets.top)
-
-                ZStack(alignment: .bottom) {
-                    if let scene {
-                        SpriteView(scene: scene)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-
-                    HStack(alignment: .bottom, spacing: 0) {
-                        #if targetEnvironment(simulator)
-                        SimulatorDPadView(motionManager: motionManager)
-                            .frame(width: 160, height: 160)
-                            .padding(.leading, 20)
-                        #endif
-                        Spacer()
-                        tapButton
-                            .padding(.trailing, 20)
-                    }
-                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 8) + 8)
+            ZStack {
+                switch phase {
+                case .prompt:
+                    promptView
+                        .transition(.opacity)
+                case .playing:
+                    gameView(geo: geo)
+                        .transition(.opacity)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .animation(.easeInOut(duration: 0.35), value: phase)
             .onAppear {
                 viewSize = geo.size
                 if scene == nil { scene = buildScene(size: geo.size) }
             }
             .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-                guard !didComplete else { return }
+                guard phase == .playing, !didComplete else { return }
                 if model.timeRemaining > 0 {
                     model.timeRemaining -= 1
                 } else {
@@ -69,6 +61,82 @@ struct MazeGameView: View {
             .sensoryFeedback(.success, trigger: model.tapCount)
         }
         .ignoresSafeArea(.all, edges: .bottom)
+    }
+
+    // MARK: - Prompt screen
+
+    private var promptView: some View {
+        ZStack {
+            Image("fluencySlide")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                Spacer()
+
+                speechBubbleView
+                    .padding(.horizontal, 40)
+
+                Spacer()
+
+                Button {
+                    phase = .playing
+                } label: {
+                    Text("Los geht's!")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 44)
+                        .padding(.vertical, 14)
+                        .background(.accent)
+                        .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
+                }
+                .padding(.bottom, 60)
+            }
+        }
+    }
+
+    private var speechBubbleView: some View {
+        VStack(spacing: 0) {
+            Text(prompt)
+                .font(.system(size: 17, weight: .semibold))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.black)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+        }
+        .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
+    }
+
+    // MARK: - Game view
+
+    @ViewBuilder
+    private func gameView(geo: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            topChrome(safeTop: geo.safeAreaInsets.top)
+
+            ZStack(alignment: .bottom) {
+                if let scene {
+                    SpriteView(scene: scene)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .opacity(sceneReady ? 1 : 0)
+                        .animation(.easeIn(duration: 0.3), value: sceneReady)
+                }
+
+                HStack(alignment: .bottom, spacing: 0) {
+                    #if targetEnvironment(simulator)
+                    SimulatorDPadView(motionManager: motionManager)
+                        .frame(width: 160, height: 160)
+                        .padding(.leading, 20)
+                    #endif
+                    Spacer()
+                    tapButton
+                        .padding(.trailing, 20)
+                }
+                .padding(.bottom, max(geo.safeAreaInsets.bottom, 8) + 8)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
     }
 
     // MARK: - Top chrome
@@ -137,7 +205,7 @@ struct MazeGameView: View {
             resetScene()
         } label: {
             HStack(spacing: 5) {
-                Image(systemName: "arrow.counterclockwise")
+                Image(systemName: "doc.append")
                     .fontWeight(.bold)
                 Text("\(model.tapCount)")
                     .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -160,6 +228,7 @@ struct MazeGameView: View {
         s.level         = selectedLevel
         let m = model
         s.onScoreChanged = { newScore in m.score = newScore }
+        s.onReady = { sceneReady = true }
         // MARK: - Multiplayer handoff: inject GameSession here
         return s
     }
@@ -167,5 +236,16 @@ struct MazeGameView: View {
     private func resetScene() {
         let size = viewSize.width > 0 ? viewSize : UIWindow.layoutFittingExpandedSize
         scene = buildScene(size: size)
+    }
+}
+
+private struct SpeechBubblePointer: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path {
+            $0.move(to: CGPoint(x: rect.midX, y: rect.maxY))
+            $0.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+            $0.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+            $0.closeSubpath()
+        }
     }
 }

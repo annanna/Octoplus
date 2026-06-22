@@ -26,14 +26,14 @@ private let onboardingSlides: [InstructionSlide] = [
             Für unser Gehirn ist das Schwerstarbeit.
             Stell dir einen Topf vor: Er fasst nur eine begrenzte Menge an Ressourcen. Müssen Denken und Bewegen gleichzeitig daraus schöpfen, wird es schnell eng.
             """,
-        symbol: "cube.box.fill"
+        imageName: "topf_deckel"
     ),
     InstructionSlide(
         title: "",
         body: """
             Bei ADHS kann dieser Topf rascher leer sein, da die Aufmerksamkeitssteuerung viele Ressourcen beansprucht. Durch gezieltes Training, füllen wir die Ressourcen im vorhinein auf.
             """,
-        symbol: "cube.box"
+        imageName: "topf_voll"
     )
 ]
 
@@ -56,6 +56,7 @@ struct OnboardingView: View {
                     Image(imageName)
                         .resizable()
                         .scaledToFit()
+                        .frame(maxWidth: currentIndex == 0 ? nil : 100)
                         .padding(.bottom, 48)
                 } else if let symbol = slide.symbol {
                     Image(systemName: symbol)
