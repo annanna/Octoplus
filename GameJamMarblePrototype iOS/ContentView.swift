@@ -25,26 +25,27 @@ struct ContentView: View {
 
     var body: some View {
         GeometryReader { geo in
-            ZStack {
-                Color.black
+            // VStack layout: top chrome sits ABOVE the SpriteView in document
+            // flow — no ZStack overlay needed, so the game field never renders
+            // behind the HUD bar.
+            VStack(spacing: 0) {
 
-                if let scene {
-                    SpriteView(scene: scene)
-                        .frame(width: geo.size.width, height: geo.size.height)
-                }
+                // ── Top chrome ───────────────────────────────────────────────
+                // With .ignoresSafeArea(.all, edges: .bottom) the GeometryReader
+                // already starts below the notch, so safeTop == 0 here.
+                // The background gets .ignoresSafeArea(edges: .top) so it still
+                // paints into the notch / Dynamic Island region above.
+                topChrome(safeTop: geo.safeAreaInsets.top)
 
-                // ── Top chrome ──────────────────────────────────────────────
-                // A single opaque block that covers from y=0 (under the
-                // notch / Dynamic Island) down to the bottom of the HUD row,
-                // so no game content is ever visible in the system safe area.
-                VStack(spacing: 0) {
-                    topChrome(safeTop: geo.safeAreaInsets.top)
-                    Spacer()
-                }
+                // ── Game field ───────────────────────────────────────────────
+                // SpriteView fills whatever space is left below the top chrome.
+                // Controls float above the game inside a ZStack.
+                ZStack(alignment: .bottom) {
+                    if let scene {
+                        SpriteView(scene: scene)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
 
-                // ── Bottom controls ─────────────────────────────────────────
-                VStack(spacing: 0) {
-                    Spacer()
                     HStack(alignment: .bottom, spacing: 0) {
                         #if targetEnvironment(simulator)
                         SimulatorDPadView(motionManager: motionManager)
@@ -57,6 +58,7 @@ struct ContentView: View {
                     }
                     .padding(.bottom, max(geo.safeAreaInsets.bottom, 8) + 8)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .onAppear {
                 viewSize = geo.size
@@ -76,18 +78,16 @@ struct ContentView: View {
 
     // MARK: - Top chrome
 
-    /// safeTop comes from geo.safeAreaInsets.top — the height of the
-    /// notch / Dynamic Island region that must remain clear of content.
     private func topChrome(safeTop: CGFloat) -> some View {
         VStack(spacing: 0) {
-            // Blank region that sits behind the notch / Dynamic Island
+            // Notch spacer — 0pt when GeometryReader already starts below notch
             Color.clear.frame(height: safeTop)
 
             // HUD row
             HStack(spacing: 0) {
                 hudCell(symbol: "trophy.fill",
                         value:  "\(model.score)",
-                        accent: Color(red: 1.0, green: 0.78, blue: 0.0))      // gold
+                        accent: Color(red: 1.0, green: 0.78, blue: 0.0))
                 chromeDivider
                 hudCell(symbol: "timer",
                         value:  timerText,
@@ -95,26 +95,30 @@ struct ContentView: View {
                 chromeDivider
                 hudCell(symbol: "checkmark.circle.fill",
                         value:  "\(model.tapCount)",
-                        accent: Color(red: 0.25, green: 0.88, blue: 0.65))    // teal-green
+                        accent: Color(red: 0.25, green: 0.88, blue: 0.65))
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
 
-            // Level picker
-            Picker("Level", selection: $selectedLevel) {
-                Text("Normal").tag(GameLevel.normal)
-                Text("Advanced").tag(GameLevel.advanced)
-                Text("Heavy").tag(GameLevel.heavy)
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 8)
-            .onChange(of: selectedLevel) { _, _ in resetGame() }
+//            // Level picker
+//            Picker("Level", selection: $selectedLevel) {
+//                Text("Normal").tag(GameLevel.normal)
+//                Text("Advanced").tag(GameLevel.advanced)
+//                Text("Heavy").tag(GameLevel.heavy)
+//            }
+//            .pickerStyle(.segmented)
+//            .padding(.horizontal, 20)
+//            .padding(.bottom, 8)
+//            .onChange(of: selectedLevel) { _, _ in resetGame() }
         }
         .frame(maxWidth: .infinity)
-        // Fully opaque — hides game content behind notch AND behind HUD row
-        .background(Color(red: 0.04, green: 0.07, blue: 0.16, opacity: 1.0))
-        // Hairline separator between chrome and game
+        .background(
+            // .ignoresSafeArea(edges: .top) stretches the background rectangle
+            // upward into the notch / Dynamic Island so the chrome looks seamless
+            // even though the view's content area starts below the safe area.
+            Color(red: 0.04, green: 0.07, blue: 0.16, opacity: 1.0)
+                .ignoresSafeArea(edges: .top)
+        )
         .overlay(alignment: .bottom) {
             Rectangle()
                 .frame(height: 1)
@@ -156,6 +160,10 @@ struct ContentView: View {
             HStack(spacing: 5) {
                 Image(systemName: "checkmark")
                     .fontWeight(.bold)
+                Text("\(model.tapCount)")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
             }
             .foregroundStyle(.white)
             .padding(10)
@@ -171,7 +179,7 @@ struct ContentView: View {
         s.scaleMode     = .resizeFill
         s.motionManager = motionManager
         s.level         = selectedLevel
-        let m = model   // class reference — stable across struct re-creations
+        let m = model
         s.onScoreChanged = { newScore in m.score = newScore }
         // MARK: - Multiplayer handoff: inject GameSession here
         return s
