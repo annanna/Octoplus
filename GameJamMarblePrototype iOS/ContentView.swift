@@ -11,9 +11,9 @@ internal import Combine
 
 @Observable
 private final class GameModel {
-    var score        = 0
-    var tapCount     = 0
-    var timeRemaining = 180   // seconds; 3 minutes per game
+    var score         = 0
+    var tapCount      = 0
+    var timeRemaining = 180   // seconds — 3 minutes per round
 }
 
 struct ContentView: View {
@@ -32,14 +32,16 @@ struct ContentView: View {
                         .frame(width: geo.size.width, height: geo.size.height)
                 }
 
-                // ── HUD bar — sits just below the notch / Dynamic Island ──
+                // ── Top chrome ──────────────────────────────────────────────
+                // A single opaque block that covers from y=0 (under the
+                // notch / Dynamic Island) down to the bottom of the HUD row,
+                // so no game content is ever visible in the system safe area.
                 VStack(spacing: 0) {
-                    hudBar
-                        .padding(.top, geo.safeAreaInsets.top + 4)
+                    topChrome(safeTop: geo.safeAreaInsets.top)
                     Spacer()
                 }
 
-                // ── Bottom controls — sits above home indicator ──
+                // ── Bottom controls ─────────────────────────────────────────
                 VStack(spacing: 0) {
                     Spacer()
                     HStack(alignment: .bottom, spacing: 0) {
@@ -63,42 +65,64 @@ struct ContentView: View {
                 if model.timeRemaining > 0 {
                     model.timeRemaining -= 1
                 } else {
-                    resetGame()  // time's up — new round, taps don't increment
+                    resetGame()
                 }
             }
+            .sensoryFeedback(.success, trigger: model.tapCount)
         }
-        .ignoresSafeArea()
+        .ignoresSafeArea(.all, edges: .bottom)
     }
 
-    // MARK: - HUD bar
+    // MARK: - Top chrome
 
-    private var hudBar: some View {
-        HStack(spacing: 0) {
-            hudCell(symbol: "trophy.fill",   value: "\(model.score)",    accent: .yellow)
-            hudDivider
-            hudCell(symbol: "timer",         value: timerText,
-                    accent: model.timeRemaining < 30 ? .red : .white)
-            hudDivider
-            hudCell(symbol: "checkmark",     value: "\(model.tapCount)", accent: .green)
+    /// safeTop comes from geo.safeAreaInsets.top — the height of the
+    /// notch / Dynamic Island region that must remain clear of content.
+    private func topChrome(safeTop: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            // Blank region that sits behind the notch / Dynamic Island
+            Color.clear.frame(height: safeTop)
+
+            // HUD row
+            HStack(spacing: 0) {
+                hudCell(symbol: "trophy.fill",
+                        value:  "\(model.score)",
+                        accent: Color(red: 1.0, green: 0.78, blue: 0.0))      // gold
+                chromeDivider
+                hudCell(symbol: "timer",
+                        value:  timerText,
+                        accent: model.timeRemaining < 30 ? .red : .white)
+                chromeDivider
+                hudCell(symbol: "checkmark.circle.fill",
+                        value:  "\(model.tapCount)",
+                        accent: Color(red: 0.25, green: 0.88, blue: 0.65))    // teal-green
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
         }
-        .padding(.vertical, 8)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+        // Fully opaque — hides game content behind notch AND behind HUD row
+        .background(Color(red: 0.04, green: 0.07, blue: 0.16, opacity: 1.0))
+        // Hairline separator between chrome and game
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .frame(height: 1)
+                .foregroundStyle(Color.white.opacity(0.12))
+        }
     }
 
-    private var hudDivider: some View {
+    private var chromeDivider: some View {
         Rectangle()
-            .frame(width: 1, height: 20)
-            .foregroundStyle(.white.opacity(0.25))
+            .frame(width: 1, height: 22)
+            .foregroundStyle(Color.white.opacity(0.18))
     }
 
     private func hudCell(symbol: String, value: String, accent: Color) -> some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 7) {
             Image(systemName: symbol)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(accent)
             Text(value)
-                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .font(.system(size: 19, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
                 .monospacedDigit()
                 .contentTransition(.numericText())
@@ -107,12 +131,10 @@ struct ContentView: View {
     }
 
     private var timerText: String {
-        let m = model.timeRemaining / 60
-        let s = model.timeRemaining % 60
-        return String(format: "%d:%02d", m, s)
+        String(format: "%d:%02d", model.timeRemaining / 60, model.timeRemaining % 60)
     }
 
-    // MARK: - Tap button (replaces Reset)
+    // MARK: - Tap button
 
     private var tapButton: some View {
         Button {
@@ -122,10 +144,6 @@ struct ContentView: View {
             HStack(spacing: 5) {
                 Image(systemName: "checkmark")
                     .fontWeight(.bold)
-                Text("\(model.tapCount)")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
             }
             .foregroundStyle(.white)
             .padding(10)
@@ -137,10 +155,10 @@ struct ContentView: View {
 
     private func buildScene(size: CGSize) -> GameScene {
         let s = GameScene(size: size)
-        s.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        s.scaleMode = .resizeFill
+        s.anchorPoint   = CGPoint(x: 0.5, y: 0.5)
+        s.scaleMode     = .resizeFill
         s.motionManager = motionManager
-        let m = model   // capture class reference — safe across struct recreations
+        let m = model   // class reference — stable across struct re-creations
         s.onScoreChanged = { newScore in m.score = newScore }
         // MARK: - Multiplayer handoff: inject GameSession here
         return s
