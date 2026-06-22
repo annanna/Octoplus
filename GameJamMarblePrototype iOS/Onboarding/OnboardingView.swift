@@ -8,19 +8,33 @@ import SwiftUI
 private let onboardingSlides: [InstructionSlide] = [
     InstructionSlide(
         title: "Willkommen!",
-        body: "Ich bin Toni Tinte, euer Oktopus-Guide. Gemeinsam erkunden wir kleine Spiele, die zeigen, wie Stress entsteht – und wie ihr besser damit umgehen könnt.",
-        symbol: "fish.fill"
+        body: "Ich bin Toni Tinte, dein tentakelstarker Trainingspartner",
+        symbol: "fish.fill",
+        imageName: "toni"
     ),
     InstructionSlide(
-        title: "Mini-Spiele",
-        body: "Jedes Spiel dauert nur wenige Minuten. Danach bewertet ihr kurz, wie schwer es war – und bekommt Tipps für die nächste Runde.",
-        symbol: "gamecontroller.fill"
+        title: "",
+        body: """
+            Gemeinsam üben wir Denkaufgaben und Körperaufgaben gleichzeitig auszuführen. 
+            Der Alltag verlangt genau das ständig von uns: Telefonieren beim Kochen, Treppensteigen und den Tag planen.
+            """,
+        symbol: "umbrella.fill"
     ),
     InstructionSlide(
-        title: "Kein Richtig oder Falsch",
-        body: "Es gibt keine Wertung, die zählt. Die Spiele sind dazu da, etwas über euch selbst herauszufinden – nicht um Highscores zu jagen.",
-        symbol: "heart.fill"
+        title: "",
+        body: """
+            Für unser Gehirn ist das Schwerstarbeit.
+            Stell dir einen Topf vor: Er fasst nur eine begrenzte Menge an Ressourcen. Müssen Denken und Bewegen gleichzeitig daraus schöpfen, wird es schnell eng. Die gute Nachricht.
+            """,
+        symbol: "cube.box.fill"
     ),
+    InstructionSlide(
+        title: "",
+        body: """
+            Bei ADHS kann dieser Topf rascher leer sein, da die Aufmerksamkeitssteuerung viele Ressourcen beansprucht. Durch gezieltes Training, füllen wir die Ressourcen im vorhinein auf.
+            """,
+        symbol: "cube.box"
+    )
 ]
 
 struct OnboardingView: View {
@@ -30,16 +44,25 @@ struct OnboardingView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 0.04, green: 0.07, blue: 0.16)
+            Image("background")
+                .resizable()
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 Spacer()
                 
-                Image(systemName: onboardingSlides[currentIndex].symbol)
-                    .font(.system(size: 80))
-                    .foregroundStyle(Color(red: 0.56, green: 0.35, blue: 0.93))
-                    .padding(.bottom, 48)
+                let slide = onboardingSlides[currentIndex]
+                if let imageName = slide.imageName {
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(.bottom, 48)
+                } else if let symbol = slide.symbol {
+                    Image(systemName: symbol)
+                        .font(.system(size: 80))
+                        .foregroundStyle(.accent)
+                        .padding(.bottom, 48)
+                }
                 
                 Text(onboardingSlides[currentIndex].title)
                     .font(.system(size: 28, weight: .bold, design: .rounded))
@@ -48,10 +71,10 @@ struct OnboardingView: View {
                     .padding(.horizontal, 32)
                 
                 Text(onboardingSlides[currentIndex].body)
-                    .font(.system(size: 17))
+                    .font(.system(size: 20))
                     .foregroundStyle(.white.opacity(0.75))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, 64)
                     .padding(.top, 16)
                 
                 Spacer()
@@ -66,7 +89,7 @@ struct OnboardingView: View {
                 }
                 .padding(.bottom, 32)
                 
-                Button(currentIndex < onboardingSlides.count - 1 ? "Weiter" : "Los geht's!") {
+                Button(currentIndex < onboardingSlides.count - 1 ? "Tauch ein!" : "Los geht's!") {
                     if currentIndex < onboardingSlides.count - 1 {
                         withAnimation(.easeInOut) { currentIndex += 1 }
                     } else {
@@ -75,7 +98,7 @@ struct OnboardingView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .tint(Color(red: 0.56, green: 0.35, blue: 0.93))
+                .tint(.accent)
                 .padding(.bottom, 56)
             }
         }
