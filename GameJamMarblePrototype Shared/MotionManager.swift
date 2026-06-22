@@ -16,6 +16,7 @@ import CoreMotion
 final class MotionManager {
     private(set) var currentTilt: CGVector = CGVector(dx: 0, dy: 0)
     var simulatedTilt: CGVector = CGVector(dx: 0, dy: 0)
+    var axesSwapped: Bool = false
 
     #if os(iOS)
     private let cm = CMMotionManager()
@@ -34,9 +35,10 @@ final class MotionManager {
 
     func tiltForFrame() -> CGVector {
         #if targetEnvironment(simulator)
-        return simulatedTilt
+        let raw = simulatedTilt
         #else
-        return currentTilt
+        let raw = currentTilt
         #endif
+        return axesSwapped ? CGVector(dx: raw.dy, dy: raw.dx) : raw
     }
 }

@@ -7,6 +7,10 @@
 
 import SpriteKit
 
+enum GameLevel: CaseIterable {
+    case normal, advanced, heavy
+}
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
 
     // MARK: - Physics bit masks
@@ -18,6 +22,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     // Injected by ContentView before presentation
     var motionManager: MotionManager?
+    var level: GameLevel = .normal
     // MARK: - Multiplayer handoff: broadcast score / game-over via match session here
     var onScoreChanged: ((Int) -> Void)?
 
@@ -40,6 +45,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         backgroundColor = SKColor(red: 0.05, green: 0.08, blue: 0.18, alpha: 1)
         physicsWorld.gravity         = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self
+
+        motionManager?.axesSwapped = (level == .advanced)
 
         MazeBuilder.build(in: self, wallCategory: Physics.wall, octopusCategory: Physics.octopus)
         spawnGoal()

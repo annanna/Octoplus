@@ -17,10 +17,11 @@ private final class GameModel {
 }
 
 struct ContentView: View {
-    @State private var motionManager = MotionManager()
-    @State private var model         = GameModel()
+    @State private var motionManager  = MotionManager()
+    @State private var model          = GameModel()
     @State private var scene: GameScene?
     @State private var viewSize: CGSize = .zero
+    @State private var selectedLevel: GameLevel = .normal
 
     var body: some View {
         GeometryReader { geo in
@@ -65,7 +66,7 @@ struct ContentView: View {
                 if model.timeRemaining > 0 {
                     model.timeRemaining -= 1
                 } else {
-                    resetGame()
+                    resetGame(resetScore: true)
                 }
             }
             .sensoryFeedback(.success, trigger: model.tapCount)
@@ -98,6 +99,17 @@ struct ContentView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
+
+            // Level picker
+            Picker("Level", selection: $selectedLevel) {
+                Text("Normal").tag(GameLevel.normal)
+                Text("Advanced").tag(GameLevel.advanced)
+                Text("Heavy").tag(GameLevel.heavy)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 8)
+            .onChange(of: selectedLevel) { _, _ in resetGame() }
         }
         .frame(maxWidth: .infinity)
         // Fully opaque — hides game content behind notch AND behind HUD row
@@ -158,16 +170,17 @@ struct ContentView: View {
         s.anchorPoint   = CGPoint(x: 0.5, y: 0.5)
         s.scaleMode     = .resizeFill
         s.motionManager = motionManager
+        s.level         = selectedLevel
         let m = model   // class reference — stable across struct re-creations
         s.onScoreChanged = { newScore in m.score = newScore }
         // MARK: - Multiplayer handoff: inject GameSession here
         return s
     }
 
-    private func resetGame() {
-        model.score         = 0
+    private func resetGame(resetScore: Bool = false) {
+        if resetScore { model.score = 0 }
         model.timeRemaining = 180
-        let size = viewSize.width > 0 ? viewSize : UIScreen.main.bounds.size
+        let size = viewSize.width > 0 ? viewSize : UIWindow.layoutFittingExpandedSize
         scene = buildScene(size: size)
     }
 }
