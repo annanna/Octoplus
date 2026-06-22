@@ -33,13 +33,6 @@ final class GoalPortalNode: SKNode {
         inner.fillColor = SKColor(white: 1, alpha: 0.06)
         addChild(inner)
 
-        let exitLabel = SKLabelNode(text: "EXIT")
-        exitLabel.fontName = "Helvetica-Bold"
-        exitLabel.fontSize = 11
-        exitLabel.fontColor = teal
-        exitLabel.position = CGPoint(x: 0, y: radius + 12)
-        addChild(exitLabel)
-
         let pulse = SKAction.sequence([
             SKAction.group([
                 SKAction.scale(to: 1.12, duration: 0.9),
