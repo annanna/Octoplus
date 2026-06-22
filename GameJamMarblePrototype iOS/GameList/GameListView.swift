@@ -92,20 +92,20 @@ private struct GameCard: View {
                 if game.isUnlocked {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.4))
+                        .foregroundStyle(.white)
                 } else {
                     Text("Coming Soon")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.white.opacity(0.4))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
+                        .background(.black.opacity(0.08), in: RoundedRectangle(cornerRadius: 6))
                 }
             }
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(.white.opacity(game.isUnlocked ? 0.08 : 0.04))
+                    .fill(.black.opacity(0.2))
             )
         }
         .disabled(!game.isUnlocked)
@@ -113,5 +113,8 @@ private struct GameCard: View {
 }
 
 #Preview {
+    @Previewable @State var appState = AppState()
+    
     GameListView()
+        .environment(appState)
 }

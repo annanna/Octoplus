@@ -17,7 +17,7 @@ private final class MazeGameModel {
 
 struct MazeGameView: View {
     let onComplete: (GameResult) -> Void
-
+    
     @State private var motionManager = MotionManager()
     @State private var model         = MazeGameModel()
     @State private var scene: GameScene?
@@ -62,24 +62,24 @@ struct MazeGameView: View {
         }
         .ignoresSafeArea(.all, edges: .bottom)
     }
-
+    
     // MARK: - Prompt screen
-
+    
     private var promptView: some View {
         ZStack {
             Image("fluencySlide")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-
+            
             VStack(spacing: 0) {
                 Spacer()
-
+                
                 speechBubbleView
-                    .padding(.horizontal, 40)
-
+                    .padding(.horizontal, 80)
+                
                 Spacer()
-
+                
                 Button {
                     phase = .playing
                 } label: {
@@ -88,33 +88,34 @@ struct MazeGameView: View {
                         .foregroundStyle(.white)
                         .padding(.horizontal, 44)
                         .padding(.vertical, 14)
-                        .background(.accent)
-                        .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
+                        .background(.accent.opacity(0.8))
+                        .clipShape(.capsule)
+                        .shadow(color: .black.opacity(0.3), radius: 16, y: 9)
                 }
                 .padding(.bottom, 60)
             }
         }
     }
-
+    
     private var speechBubbleView: some View {
         VStack(spacing: 0) {
             Text(prompt)
                 .font(.system(size: 17, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.black)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 32)
                 .padding(.vertical, 18)
         }
         .shadow(color: .black.opacity(0.2), radius: 10, y: 4)
     }
-
+    
     // MARK: - Game view
-
+    
     @ViewBuilder
     private func gameView(geo: GeometryProxy) -> some View {
         VStack(spacing: 0) {
-            topChrome(safeTop: geo.safeAreaInsets.top)
-
+            topChrome()
+            
             ZStack(alignment: .bottom) {
                 if let scene {
                     SpriteView(scene: scene)
@@ -122,13 +123,13 @@ struct MazeGameView: View {
                         .opacity(sceneReady ? 1 : 0)
                         .animation(.easeIn(duration: 0.3), value: sceneReady)
                 }
-
+                
                 HStack(alignment: .bottom, spacing: 0) {
-                    #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
                     SimulatorDPadView(motionManager: motionManager)
                         .frame(width: 160, height: 160)
                         .padding(.leading, 20)
-                    #endif
+#endif
                     Spacer()
                     tapButton
                         .padding(.trailing, 20)
@@ -138,23 +139,30 @@ struct MazeGameView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
-
+    
     // MARK: - Top chrome
-
-    private func topChrome(safeTop: CGFloat) -> some View {
+    
+    private func topChrome() -> some View {
         VStack(spacing: 0) {
-            Color.clear.frame(height: safeTop)
-
+            Text(prompt)
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 64)
+                .font(.title2)
+                .bold()
+            
             HStack(spacing: 0) {
-                hudCell(symbol: "trophy.fill",
+                hudCell(symbol: nil, image: "schnecke",
                         value:  "\(model.score)",
                         accent: Color(red: 1.0, green: 0.78, blue: 0.0))
                 chromeDivider
                 hudCell(symbol: "timer",
+                        image: nil,
                         value:  timerText,
                         accent: model.timeRemaining < 30 ? .red : .white)
                 chromeDivider
-                hudCell(symbol: "checkmark.circle.fill",
+                hudCell(symbol: "doc.append",
+                        image: nil,
                         value:  "\(model.tapCount)",
                         accent: Color(red: 0.25, green: 0.88, blue: 0.65))
             }
@@ -172,18 +180,25 @@ struct MazeGameView: View {
                 .foregroundStyle(Color.white.opacity(0.12))
         }
     }
-
+    
     private var chromeDivider: some View {
         Rectangle()
             .frame(width: 1, height: 22)
             .foregroundStyle(Color.white.opacity(0.18))
     }
-
-    private func hudCell(symbol: String, value: String, accent: Color) -> some View {
+    
+    private func hudCell(symbol: String?, image: String?, value: String, accent: Color) -> some View {
         HStack(spacing: 7) {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(accent)
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(accent)
+            } else if let image {
+                Image(image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 20)
+            }
             Text(value)
                 .font(.system(size: 19, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
@@ -192,13 +207,13 @@ struct MazeGameView: View {
         }
         .frame(maxWidth: .infinity)
     }
-
+    
     private var timerText: String {
         String(format: "%d:%02d", model.timeRemaining / 60, model.timeRemaining % 60)
     }
-
+    
     // MARK: - Tap button
-
+    
     private var tapButton: some View {
         Button {
             model.tapCount += 1
@@ -217,9 +232,9 @@ struct MazeGameView: View {
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
         }
     }
-
+    
     // MARK: - Scene management
-
+    
     private func buildScene(size: CGSize) -> GameScene {
         let s = GameScene(size: size)
         s.anchorPoint   = CGPoint(x: 0.5, y: 0.5)
@@ -232,7 +247,7 @@ struct MazeGameView: View {
         // MARK: - Multiplayer handoff: inject GameSession here
         return s
     }
-
+    
     private func resetScene() {
         let size = viewSize.width > 0 ? viewSize : UIWindow.layoutFittingExpandedSize
         scene = buildScene(size: size)
@@ -247,5 +262,11 @@ private struct SpeechBubblePointer: Shape {
             $0.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
             $0.closeSubpath()
         }
+    }
+}
+
+#Preview {
+    MazeGameView { _ in
+        
     }
 }

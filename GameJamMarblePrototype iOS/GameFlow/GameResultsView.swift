@@ -35,13 +35,15 @@ struct GameResultsView: View {
 
                 HStack(spacing: 24) {
                     statCell(
-                        symbol: "trophy.fill",
-                        label: "Punkte",
+                        symbol: nil,
+                        image: "schnecke",
+                        label: "Schnecken",
                         value: "\(result.score)",
                         accent: Color(red: 1.0, green: 0.78, blue: 0.0)
                     )
                     statCell(
                         symbol: "doc.append",
+                        image: nil,
                         label: "Wörter",
                         value: "\(result.tapCount)",
                         accent: Color(red: 0.25, green: 0.88, blue: 0.65)
@@ -62,11 +64,18 @@ struct GameResultsView: View {
         }
     }
 
-    private func statCell(symbol: String, label: String, value: String, accent: Color) -> some View {
+    private func statCell(symbol: String?, image: String?, label: String, value: String, accent: Color) -> some View {
         VStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.system(size: 28))
-                .foregroundStyle(accent)
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.system(size: 28))
+                    .foregroundStyle(accent)
+            } else if let image {
+                Image(image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 36)
+            }
             Text(value)
                 .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
@@ -77,5 +86,10 @@ struct GameResultsView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
         .background(.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+#Preview {
+    GameResultsView(game: mazeGame, result: .init(score: 10, timeUsed: 40, tapCount: 3)) {
     }
 }

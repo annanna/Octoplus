@@ -19,7 +19,7 @@ final class GoalPortalNode: SKNode {
 
     private func buildAppearance(radius: CGFloat) {
         let sprite = SKSpriteNode(imageNamed: "schnecke")
-        sprite.size = CGSize(width: radius * 4, height: radius * 4)
+        sprite.size = CGSize(width: radius * 1.5, height: radius * 1.5)
         addChild(sprite)
 
         let pulse = SKAction.sequence([
