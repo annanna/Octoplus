@@ -4,6 +4,7 @@
 
 import SwiftUI
 import SpriteKit
+import AVFoundation
 internal import Combine
 
 private enum MazePhase: Equatable { case prompt, playing }
@@ -28,6 +29,7 @@ struct MazeGameView: View {
     @State private var phase: MazePhase = .prompt
     @State private var sceneReady = false
     @State private var prompt = VerbalFluencyPrompts.randomElement() ?? ""
+    @State private var backgroundMusic: AVAudioPlayer?
     
     var body: some View {
         GeometryReader { geo in
@@ -52,12 +54,16 @@ struct MazeGameView: View {
                     model.timeRemaining -= 1
                 } else {
                     didComplete = true
+                    backgroundMusic?.stop()
                     onComplete(GameResult(
                         score: model.score,
                         timeUsed: 30,
                         tapCount: model.tapCount
                     ))
                 }
+            }
+            .onChange(of: phase) { _, newPhase in
+                if newPhase == .playing { startBackgroundMusic() }
             }
             .sensoryFeedback(.success, trigger: model.tapCount)
         }
@@ -266,6 +272,13 @@ struct MazeGameView: View {
     private func resetScene() {
         let size = viewSize.width > 0 ? viewSize : UIWindow.layoutFittingExpandedSize
         scene = buildScene(size: size)
+    }
+
+    private func startBackgroundMusic() {
+        guard let url = Bundle.main.url(forResource: "waterdrop", withExtension: "mp3") else { return }
+        backgroundMusic = try? AVAudioPlayer(contentsOf: url)
+        backgroundMusic?.numberOfLoops = -1
+        backgroundMusic?.play()
     }
 }
 

@@ -98,6 +98,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         score += 1
         // MARK: - Multiplayer handoff: broadcast updated score to all players here
         onScoreChanged?(score)
+        run(SKAction.playSoundFileNamed("slurp.mp3", waitForCompletion: false))
     }
     
     private func respawnGoal() {
