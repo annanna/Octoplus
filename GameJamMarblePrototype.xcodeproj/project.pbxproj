@@ -156,7 +156,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MLNGCWRQ8M;
+				DEVELOPMENT_TEAM = UC7L39YR9W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMotionUsageDescription = "Used to tilt and control the octopus through the maze";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -170,7 +170,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = de.epikur.GameJamMarblePrototype;
+				PRODUCT_BUNDLE_IDENTIFIER = de.annanna.GameJamOctopus;
 				PRODUCT_NAME = GameJamMarblePrototype;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -190,7 +190,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = MLNGCWRQ8M;
+				DEVELOPMENT_TEAM = UC7L39YR9W;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMotionUsageDescription = "Used to tilt and control the octopus through the maze";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -204,7 +204,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = de.epikur.GameJamMarblePrototype;
+				PRODUCT_BUNDLE_IDENTIFIER = de.annanna.GameJamOctopus;
 				PRODUCT_NAME = GameJamMarblePrototype;
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
