@@ -23,12 +23,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     private var octopus: OctopusNode!
     private var goalNode: GoalPortalNode!
-    private var scoreLabel: SKLabelNode!
 
-    private var score = 0
+    private var score    = 0
     private var goalBusy = false  // blocks re-trigger during respawn animation
 
-    private let maxSpeed: CGFloat = 300
+    private let maxSpeed:     CGFloat = 300
     private let gravityScale: CGFloat = 15
 
     private var hh: CGFloat { size.height / 2 }
@@ -37,70 +36,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Lifecycle
 
     override func didMove(to view: SKView) {
-        anchorPoint = CGPoint(x: 0.5, y: 0.5)
+        anchorPoint     = CGPoint(x: 0.5, y: 0.5)
         backgroundColor = SKColor(red: 0.05, green: 0.08, blue: 0.18, alpha: 1)
-        physicsWorld.gravity = CGVector(dx: 0, dy: 0)
+        physicsWorld.gravity         = CGVector(dx: 0, dy: 0)
         physicsWorld.contactDelegate = self
 
         MazeBuilder.build(in: self, wallCategory: Physics.wall, octopusCategory: Physics.octopus)
         spawnGoal()
         spawnOctopus()
-        buildScoreLabel()
     }
 
     // MARK: - Spawn helpers
 
     private func spawnGoal() {
-        goalNode = GoalPortalNode()
+        goalNode          = GoalPortalNode()
         goalNode.position = CGPoint(x: 0, y: -(hh * 0.806))
-        goalNode.name = "goal"
+        goalNode.name     = "goal"
 
         let body = SKPhysicsBody(circleOfRadius: 30)
-        body.isDynamic = false
-        body.categoryBitMask = Physics.goal
-        body.contactTestBitMask = Physics.octopus
-        body.collisionBitMask = 0  // sensor
-        goalNode.physicsBody = body
+        body.isDynamic           = false
+        body.categoryBitMask     = Physics.goal
+        body.contactTestBitMask  = Physics.octopus
+        body.collisionBitMask    = 0  // sensor
+        goalNode.physicsBody     = body
         addChild(goalNode)
     }
 
     private func spawnOctopus() {
-        octopus = OctopusNode()
+        octopus          = OctopusNode()
         octopus.position = CGPoint(x: 0, y: hh * 0.806)
 
         let body = SKPhysicsBody(circleOfRadius: octopus.radius)
-        body.linearDamping = 0.4
-        body.angularDamping = 0.8
-        body.restitution = 0.1
-        body.allowsRotation = false
-        body.categoryBitMask = Physics.octopus
-        body.contactTestBitMask = Physics.goal
-        body.collisionBitMask = Physics.wall
-        octopus.physicsBody = body
+        body.linearDamping       = 0.4
+        body.angularDamping      = 0.8
+        body.restitution         = 0.1
+        body.allowsRotation      = false
+        body.categoryBitMask     = Physics.octopus
+        body.contactTestBitMask  = Physics.goal
+        body.collisionBitMask    = Physics.wall
+        octopus.physicsBody      = body
         addChild(octopus)
-    }
-
-    private func buildScoreLabel() {
-        scoreLabel = SKLabelNode(fontNamed: "Helvetica-Bold")
-        scoreLabel.text = "0"
-        scoreLabel.fontSize = 30
-        scoreLabel.fontColor = .white
-        scoreLabel.horizontalAlignmentMode = .center
-        scoreLabel.verticalAlignmentMode = .center
-        scoreLabel.position = CGPoint(x: 0, y: hh - 30)
-        scoreLabel.zPosition = 10
-        addChild(scoreLabel)
     }
 
     // MARK: - Score & goal respawn
 
     private func collectGoal() {
         score += 1
-        scoreLabel.text = "\(score)"
-        scoreLabel.run(SKAction.sequence([
-            SKAction.scale(to: 1.5, duration: 0.07),
-            SKAction.scale(to: 1.0, duration: 0.10)
-        ]))
         // MARK: - Multiplayer handoff: broadcast updated score to all players here
         onScoreChanged?(score)
     }
@@ -109,10 +90,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let oldPos = goalNode.position
         let newPos = randomSafePosition()
 
-        // Disable sensor so the octopus can't re-trigger during the animation
-        goalNode.physicsBody?.categoryBitMask = 0
+        goalNode.physicsBody?.categoryBitMask = 0   // disable sensor during animation
 
-        // Ripple at old position
         spawnPickupRipple(at: oldPos)
 
         goalNode.run(SKAction.sequence([
@@ -134,11 +113,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     private func spawnPickupRipple(at pos: CGPoint) {
         let ring = SKShapeNode(circleOfRadius: 28)
-        ring.position = pos
+        ring.position    = pos
         ring.strokeColor = SKColor(red: 0.0, green: 0.78, blue: 0.74, alpha: 0.9)
-        ring.lineWidth = 3
-        ring.fillColor = .clear
-        ring.zPosition = 5
+        ring.lineWidth   = 3
+        ring.fillColor   = .clear
+        ring.zPosition   = 5
         addChild(ring)
         ring.run(SKAction.sequence([
             SKAction.group([
@@ -152,26 +131,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // MARK: - Random safe position
 
     private func randomSafePosition() -> CGPoint {
-        let bt:     CGFloat = 14
-        let margin: CGFloat = 40   // clearance from borders
-        let wHalf:  CGFloat = 10 + 40  // half inner-wall height + same margin
+        let bt:    CGFloat = 14
+        let margin: CGFloat = 40
+        let wHalf:  CGFloat = 10 + 40   // inner-wall half-height + margin
 
         let left  = -hw + bt + margin
         let right =  hw - bt - margin
 
-        // Proportional wall Y centres (same fractions as MazeBuilder)
         let ya =  hh * 0.569
         let yb =  hh * 0.190
         let yc = -hh * 0.190
         let yd = -hh * 0.569
 
-        // Five horizontal corridors; any x inside [left, right] is safe within each band
         let bands: [(lo: CGFloat, hi: CGFloat)] = [
-            (ya + wHalf,      hh - bt - margin),   // above Wall E
-            (yb + wHalf,      ya - wHalf),          // between E and F
-            (yc + wHalf,      yb - wHalf),          // between F and G
-            (yd + wHalf,      yc - wHalf),          // between G and H
-            (-hh + bt + margin, yd - wHalf),        // below Wall H
+            (ya + wHalf,        hh - bt - margin),   // above Wall E
+            (yb + wHalf,        ya - wHalf),          // between E and F
+            (yc + wHalf,        yb - wHalf),          // between F and G
+            (yd + wHalf,        yc - wHalf),          // between G and H
+            (-hh + bt + margin, yd - wHalf),          // below Wall H
         ]
 
         let valid = bands.filter { $0.hi - $0.lo > 20 }
