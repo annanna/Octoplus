@@ -27,7 +27,7 @@ final class MotionManager {
         cm.deviceMotionUpdateInterval = 1.0 / 60.0
         cm.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
             guard let motion else { return }
-            self?.currentTilt = CGVector(dx: motion.gravity.x, dy: -motion.gravity.y)
+            self?.currentTilt = CGVector(dx: -motion.gravity.x, dy: -motion.gravity.y)
         }
         #endif
     }
