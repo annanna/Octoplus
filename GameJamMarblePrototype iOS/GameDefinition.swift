@@ -40,4 +40,5 @@ struct GameDefinition: Identifiable {
     let instructionSlides: [InstructionSlide]
     let tips: GameTips
     let makeView: (@escaping (GameResult) -> Void) -> AnyView
+    var imageName: String
 }

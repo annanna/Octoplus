@@ -158,6 +158,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UC7L39YR9W;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = OctoPlus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.educational-games";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Used to tilt and control the octopus through the maze";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -197,6 +198,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UC7L39YR9W;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = OctoPlus;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.educational-games";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Used to tilt and control the octopus through the maze";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

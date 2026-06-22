@@ -7,21 +7,26 @@ import SwiftUI
 
 let mazeGame = GameDefinition(
     id: "maze",
-    title: "Marble Maze",
-    subtitle: "Neige dein Gerät, um den Oktopus ans Ziel zu bringen",
-    accentColor: Color(red: 0.56, green: 0.35, blue: 0.93),
+    title: "Tintenlabyrinth",
+    subtitle: "Bring mich zur Schnecke und sammel Wörter",
+    accentColor: .accent,
     isUnlocked: true,
     instructionSlides: [
         InstructionSlide(
             title: "Ziel des Spiels",
-            body: "Neige dein Gerät, um den Oktopus durch das Labyrinth zu steuern. Sammle so viele Portale wie möglich, bevor die Zeit abläuft!",
+            body: "Neige dein Gerät, um mich durch das Labyrinth zu steuern. Sammle so viele Schnecken wie möglich, bevor die Zeit abläuft!",
             symbol: "scope"
         ),
         InstructionSlide(
             title: "Steuerung",
-            body: "Die Schwerkraft folgt deiner Handbewegung. Neige langsam – zu schnell, und der Oktopus verliert die Kontrolle.",
+            body: "Die Schwerkraft folgt deiner Handbewegung.",
             symbol: "iphone.motion"
         ),
+        InstructionSlide(
+            title: "Wörterreihe",
+            body: "Nenne währenddessen so viele Wört zu einem Thema, wie dir einfallen. Dabei gibt es kein Falsch oder Richtig, jede Antwort zählt! Wenn du eine Antwort ausgesprochen hast, tippe auf den Button unten rechts zum Zählen.",
+            symbol: "waveform.path"
+        )
     ],
     tips: GameTips(
         easier: [
@@ -37,5 +42,6 @@ let mazeGame = GameDefinition(
     ),
     makeView: { onComplete in
         AnyView(MazeGameView(onComplete: onComplete))
-    }
+    },
+    imageName: "TintenLabyrinth"
 )

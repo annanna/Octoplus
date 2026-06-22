@@ -9,23 +9,25 @@ private let allGames: [GameDefinition] = [
     mazeGame,
     GameDefinition(
         id: "bubbles",
-        title: "Bubble Pop",
+        title: "Buntes Meer",
         subtitle: "Demnächst verfügbar",
         accentColor: Color(red: 202/256, green: 157/256, blue: 113/256),
         isUnlocked: false,
         instructionSlides: [],
         tips: GameTips(easier: [], harder: []),
-        makeView: { _ in AnyView(EmptyView()) }
+        makeView: { _ in AnyView(EmptyView()) },
+        imageName: "BuntesMeer"
     ),
     GameDefinition(
         id: "gravity",
-        title: "Gravity Flip",
+        title: "Blubber Tanz",
         subtitle: "Demnächst verfügbar",
         accentColor: Color(red: 1.0, green: 0.47, blue: 0.0),
         isUnlocked: false,
         instructionSlides: [],
         tips: GameTips(easier: [], harder: []),
-        makeView: { _ in AnyView(EmptyView()) }
+        makeView: { _ in AnyView(EmptyView()) },
+        imageName: "BlubberTanz"
     ),
 ]
 
@@ -34,7 +36,8 @@ struct GameListView: View {
 
     var body: some View {
         ZStack {
-            Color(red: 0.04, green: 0.07, blue: 0.16)
+            Image("background")
+                .resizable()
                 .ignoresSafeArea()
 
             ScrollView {
@@ -68,7 +71,8 @@ private struct GameCard: View {
                     .fill(game.accentColor.opacity(game.isUnlocked ? 0.25 : 0.1))
                     .frame(width: 56, height: 56)
                     .overlay {
-                        Image(systemName: game.isUnlocked ? "gamecontroller.fill" : "lock.fill")
+                        Image(game.imageName)
+                            .resizable()
                             .font(.system(size: 22))
                             .foregroundStyle(game.accentColor.opacity(game.isUnlocked ? 1 : 0.4))
                     }
@@ -105,4 +109,8 @@ private struct GameCard: View {
         }
         .disabled(!game.isUnlocked)
     }
+}
+
+#Preview {
+    GameListView()
 }

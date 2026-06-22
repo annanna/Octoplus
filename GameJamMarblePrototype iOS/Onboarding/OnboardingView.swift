@@ -24,7 +24,7 @@ private let onboardingSlides: [InstructionSlide] = [
         title: "",
         body: """
             Für unser Gehirn ist das Schwerstarbeit.
-            Stell dir einen Topf vor: Er fasst nur eine begrenzte Menge an Ressourcen. Müssen Denken und Bewegen gleichzeitig daraus schöpfen, wird es schnell eng. Die gute Nachricht.
+            Stell dir einen Topf vor: Er fasst nur eine begrenzte Menge an Ressourcen. Müssen Denken und Bewegen gleichzeitig daraus schöpfen, wird es schnell eng.
             """,
         symbol: "cube.box.fill"
     ),
@@ -89,7 +89,8 @@ struct OnboardingView: View {
                 }
                 .padding(.bottom, 32)
                 
-                Button(currentIndex < onboardingSlides.count - 1 ? "Tauch ein!" : "Los geht's!") {
+                
+                Button(buttonText) {
                     if currentIndex < onboardingSlides.count - 1 {
                         withAnimation(.easeInOut) { currentIndex += 1 }
                     } else {
@@ -101,6 +102,14 @@ struct OnboardingView: View {
                 .tint(.accent)
                 .padding(.bottom, 56)
             }
+        }
+    }
+    
+    var buttonText: String {
+        return switch currentIndex {
+        case 0: "Tauch ein!"
+        case onboardingSlides.count - 1: "Los geht's!"
+        default: "Weiter"
         }
     }
 }

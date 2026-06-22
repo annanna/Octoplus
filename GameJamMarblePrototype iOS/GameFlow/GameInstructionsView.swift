@@ -14,12 +14,13 @@ struct GameInstructionsView: View {
 
     private var slides: [InstructionSlide] { game.instructionSlides }
     private var hasSlides: Bool { !slides.isEmpty }
-
+    
     var body: some View {
         ZStack {
-            Color(red: 0.04, green: 0.07, blue: 0.16)
+            Image("background")
+                .resizable()
                 .ignoresSafeArea()
-
+            
             VStack(spacing: 0) {
                 // Back button
                 HStack {
@@ -37,17 +38,17 @@ struct GameInstructionsView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
                 .padding(.bottom, 8)
-
+                
                 Spacer()
-
+                
                 if hasSlides {
                     slideContent
                 } else {
                     readyContent
                 }
-
+                
                 Spacer()
-
+                
                 bottomBar
             }
         }
