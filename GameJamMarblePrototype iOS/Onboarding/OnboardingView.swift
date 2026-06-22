@@ -47,39 +47,46 @@ struct OnboardingView: View {
             Image("background")
                 .resizable()
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
-                Spacer()
-                
-                let slide = onboardingSlides[currentIndex]
-                if let imageName = slide.imageName {
-                    Image(imageName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: currentIndex == 0 ? nil : 100)
-                        .padding(.bottom, 48)
-                } else if let symbol = slide.symbol {
-                    Image(systemName: symbol)
-                        .font(.system(size: 80))
-                        .foregroundStyle(.accent)
-                        .padding(.bottom, 48)
+                TabView(selection: $currentIndex) {
+                    ForEach(onboardingSlides.indices, id: \.self) { i in
+                        let slide = onboardingSlides[i]
+                        VStack(spacing: 0) {
+                            Spacer()
+                            if let imageName = slide.imageName {
+                                Image(imageName)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: i == 0 ? nil : 100)
+                                    .padding(.bottom, 48)
+                            } else if let symbol = slide.symbol {
+                                Image(systemName: symbol)
+                                    .font(.system(size: 80))
+                                    .foregroundStyle(.accent)
+                                    .padding(.bottom, 48)
+                            }
+
+                            Text(slide.title)
+                                .font(.system(size: 28, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 32)
+
+                            Text(slide.body)
+                                .font(.system(size: 20))
+                                .foregroundStyle(.white.opacity(0.75))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 64)
+                                .padding(.top, 16)
+
+                            Spacer()
+                        }
+                        .tag(i)
+                    }
                 }
-                
-                Text(onboardingSlides[currentIndex].title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                
-                Text(onboardingSlides[currentIndex].body)
-                    .font(.system(size: 20))
-                    .foregroundStyle(.white.opacity(0.75))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 64)
-                    .padding(.top, 16)
-                
-                Spacer()
-                
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
                 HStack(spacing: 8) {
                     ForEach(0..<onboardingSlides.count, id: \.self) { i in
                         Circle()
@@ -89,11 +96,10 @@ struct OnboardingView: View {
                     }
                 }
                 .padding(.bottom, 32)
-                
-                
+
                 Button(buttonText) {
                     if currentIndex < onboardingSlides.count - 1 {
-                        withAnimation(.easeInOut) { currentIndex += 1 }
+                        currentIndex += 1
                     } else {
                         onDone()
                     }

@@ -55,26 +55,31 @@ struct GameInstructionsView: View {
     }
 
     private var slideContent: some View {
-        VStack(spacing: 24) {
-            if let symbol = slides[slideIndex].symbol {
-                Image(systemName: symbol)
-                    .font(.system(size: 64))
-                    .foregroundStyle(game.accentColor)
-            }
-            
-            Text(slides[slideIndex].title)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+        TabView(selection: $slideIndex) {
+            ForEach(slides.indices, id: \.self) { i in
+                VStack(spacing: 24) {
+                    if let symbol = slides[i].symbol {
+                        Image(systemName: symbol)
+                            .font(.system(size: 64))
+                            .foregroundStyle(game.accentColor)
+                    }
 
-            Text(slides[slideIndex].body)
-                .font(.system(size: 17))
-                .foregroundStyle(.white.opacity(0.75))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                    Text(slides[i].title)
+                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+
+                    Text(slides[i].body)
+                        .font(.system(size: 17))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                }
+                .tag(i)
+            }
         }
-        .animation(.easeInOut, value: slideIndex)
+        .tabViewStyle(.page(indexDisplayMode: .never))
     }
 
     private var readyContent: some View {
@@ -112,7 +117,7 @@ struct GameInstructionsView: View {
                 if isLastSlide {
                     onStart()
                 } else {
-                    withAnimation(.easeInOut) { slideIndex += 1 }
+                    slideIndex += 1
                 }
             }
             .buttonStyle(.borderedProminent)
